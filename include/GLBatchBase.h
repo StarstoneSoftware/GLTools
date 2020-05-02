@@ -28,11 +28,7 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 
 #ifndef __GL_BATCH_BASE__
 #define __GL_BATCH_BASE__
-
-
-#ifndef SB_MOBILE_BUILD
 #include <QOpenGLFunctions>
-#endif
 
 
 ////////////////////////////////////////////////////////////////////
@@ -41,12 +37,7 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 // are derived from this. Having a virtual Draw() function allows
 // these classes to be collected by container classes that can
 // then iterate over them and call their draw methods. 
-
-#ifndef SB_MOBILE_BUILD
 class GLBatchBase : public QOpenGLFunctions
-#else
-class GLBatchBase
-#endif
 	{
 	public:
 		GLBatchBase()

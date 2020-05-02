@@ -44,7 +44,6 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 // Windows
 #ifdef WIN32
 #include <windows.h>		// Must have for Windows platform builds
-#define OPENGL_ES			// Using Angle now for OpenGL ES 2.0 on desktop
 #endif
 
 
@@ -86,7 +85,7 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 #include <GLBatch.h>
 #include <GLTriangleBatch.h>
 
-class GLTools
+class GLTools : public QOpenGLFunctions
         {
 	public:
 		GLTools() { pMe = NULL; }
@@ -99,7 +98,7 @@ class GLTools
 		}
 
 		void InitializeGL(void) {
-
+                initializeOpenGLFunctions();
 		strncpy((char *)szRenderer, (char*)glGetString(GL_RENDERER), 63); szRenderer[63] = 0;
 		strncpy((char *)szVendor, (char *)glGetString(GL_VENDOR), 63);     szVendor[63] = 0;
 		strncpy((char *)szVersion, (char *)glGetString(GL_VERSION), 63);   szVersion[63] = 0;

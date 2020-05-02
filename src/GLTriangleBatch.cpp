@@ -348,13 +348,7 @@ void GLTriangleBatch::Draw(bool bToggleAttribs)
 bool GLTriangleBatch::SaveMesh(FILE *pFile)
     {
 	(void)pFile;
-#ifdef OPENGL_ES
-return false;
-#else   
-#ifdef SB_LINUX_BUILD
-return false;
-#else
-    // Header contains...
+/*    // Header contains...
     fwrite(&nNumIndexes, sizeof(GLuint), 1, pFile);
     fwrite(&nNumVerts, sizeof(GLuint), 1, pFile);
     fwrite(&boundingSphereRadius, sizeof(GLuint), 1, pFile);
@@ -394,10 +388,8 @@ return false;
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         
-    
+  */
     return true;
-#endif
-#endif
     }
 
 
