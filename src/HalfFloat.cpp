@@ -1,9 +1,9 @@
 /*
  *  HalfFloat.cpp
- *  StarTrek
+ *  
  *
  *  Created by Richard Wright on 12/6/10.
- *  Copyright 2010 Starstone Software Systems, Inc. All rights reserved.
+ *  Copyright 2010-2023 Starstone Software Systems, Inc. All rights reserved.
  *
  */
 

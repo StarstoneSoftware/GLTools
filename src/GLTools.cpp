@@ -5,18 +5,14 @@
  *  OpenGL SuperBible, 5th Edition
  *
  */
-/* Copyright (c) 2005-2010, Richard S. Wright Jr.
+/* Copyright (c) 2005-2023, Richard S. Wright Jr.
 All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source, with or without modification, 
 are permitted provided that the following conditions are met:
 
 Redistributions of source code must retain the above copyright notice, this list 
 of conditions and the following disclaimer.
-
-Redistributions in binary form must reproduce the above copyright notice, this list 
-of conditions and the following disclaimer in the documentation and/or other 
-materials provided with the distribution.
 
 Neither the name of Richard S. Wright Jr. nor the names of other contributors may be used 
 to endorse or promote products derived from this software without specific prior 
@@ -33,17 +29,8 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <GLTools.h>
-#include <math3d.h>
-#include <GLTriangleBatch.h>
-#include <stdio.h>
-#include <assert.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <string.h>
-#ifndef _WIN32
-#include <unistd.h>
-#endif
+#include "GLTools.h"
+
 
 GLTools* GLTools::pMe = NULL;
 
@@ -1087,12 +1074,12 @@ bool GLTools::gltLoadShaderFile(const char *szFile, GLuint shader)
 	{
     char szShaderLine[128];
     
-    GLint shaderLength = 0;
+    size_t shaderLength = 0;
     FILE *fp;
 	
     // Open the shader file
     fp = fopen(szFile, "r");
-    shaderText[0] = NULL;
+    shaderText[0] = 0x0;
     if(fp != NULL)
 		{
         // Get a line at a time
@@ -1105,7 +1092,7 @@ bool GLTools::gltLoadShaderFile(const char *szFile, GLuint shader)
             shaderLength+= strlen(szShaderLine);
 
             if(shaderLength < MAX_SHADER_LENGTH)
-                strcat((char *)shaderText, szShaderLine);
+                strncat((char *)shaderText, szShaderLine, MAX_SHADER_LENGTH - shaderLength);
             else {
                 fclose(fp);
                 return false;

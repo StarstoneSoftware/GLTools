@@ -2,18 +2,14 @@
  *  GLTriangleBatch.cpp
  *
 
-Copyright (c) 2007-2009, Richard S. Wright Jr.
+Copyright (c) 2007-2023, Richard S. Wright Jr.
 All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source, with or without modification, 
 are permitted provided that the following conditions are met:
 
 Redistributions of source code must retain the above copyright notice, this list 
 of conditions and the following disclaimer.
-
-Redistributions in binary form must reproduce the above copyright notice, this list 
-of conditions and the following disclaimer in the documentation and/or other 
-materials provided with the distribution.
 
 Neither the name of Richard S. Wright Jr. nor the names of other contributors may be used 
 to endorse or promote products derived from this software without specific prior 
@@ -44,19 +40,15 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
  */
 
 #include "GLTriangleBatch.h"
-#include <GLShaderManager.h>
-#include <stdio.h>
 
+
+// Highest 64-bit address. No memory allocation would return this address
+#define NOT_VALID_BUT_USED 0xFFFFFFFFFFFFFFFF
 
 ///////////////////////////////////////////////////////////
 // Constructor, does what constructors do... set everything to zero or NULL
 GLTriangleBatch::GLTriangleBatch(void)
     {
-    pIndexes = NULL;
-    pVerts = NULL;
-    pNorms = NULL;
-    pTexCoords = NULL;
-    
     nMaxIndexes = 0;
     nNumIndexes = 0;
     nNumVerts = 0;
@@ -73,14 +65,23 @@ GLTriangleBatch::~GLTriangleBatch(void)
     // Just in case these still are allocated when the object is destroyed
     // End does this and leaves the pointers not NULL as a flag as to which
     // ones were used. Don't uncoment this....
-//    delete [] pIndexes;
-//    delete [] pVerts;
-//    delete [] pNorms;
-//    delete [] pTexCoords;
+    if(pIndexes != (GLushort*)NOT_VALID_BUT_USED)
+        delete [] pIndexes;
+
+    if(pVerts != (M3DVector3f*)NOT_VALID_BUT_USED)
+        delete [] pVerts;
+
+    if(pNorms != (M3DVector3f*)NOT_VALID_BUT_USED)
+        delete [] pNorms;
+
+    if(pTexCoords != (M3DVector2f*)NOT_VALID_BUT_USED)
+       delete [] pTexCoords;
     
     // Delete buffer objects
-    if(bMadeStuff)
+    if(bMadeStuff) {
+        glDeleteVertexArrays(1, &vertexArrayBufferObject);
         glDeleteBuffers(4, bufferObjects);
+        }
     }
     
 ////////////////////////////////////////////////////////////
@@ -90,21 +91,28 @@ GLTriangleBatch::~GLTriangleBatch(void)
 // At least that's my humble opinion.
 void GLTriangleBatch::BeginMesh(GLuint nMaxVerts)
     {
-#ifndef SB_MOBILE_BUILD
+#ifdef QT_IS_AVAILABLE
     initializeOpenGLFunctions();
 #endif
 
     // Just in case this gets called more than once...
-    delete [] pIndexes;
-    delete [] pVerts;
-    delete [] pNorms;
-    delete [] pTexCoords;
+    if(pIndexes != (GLushort*)NOT_VALID_BUT_USED)
+        delete [] pIndexes;
+
+    if(pVerts != (M3DVector3f*)NOT_VALID_BUT_USED)
+        delete [] pVerts;
+
+    if(pNorms != (M3DVector3f*)NOT_VALID_BUT_USED)
+        delete [] pNorms;
+
+    if(pTexCoords != (M3DVector2f*)NOT_VALID_BUT_USED)
+       delete [] pTexCoords;
     
     nMaxIndexes = nMaxVerts;
     nNumIndexes = 0;
     nNumVerts = 0;
     
-    // Allocate new blocks. In reality, the other arrays will be
+    // Pre-allocate new blocks. In reality, the other arrays will be
     // much shorter than the index array
     pIndexes = new GLushort[nMaxIndexes];
     pVerts = new M3DVector3f[nMaxIndexes];
@@ -117,34 +125,45 @@ void GLTriangleBatch::BeginMesh(GLuint nMaxVerts)
 // (well, almost identical - these are floats you know...) verts. If one is found, it
 // is added to the index array. If not, it is added to both the index array and the vertex
 // array grows by one as well.
-void GLTriangleBatch::AddTriangle(M3DVector3f verts[3], M3DVector3f vNorms[3], M3DVector2f vTexCoords[3], float epsilon)
+// nCheckRange allows for optimizing the search
+void GLTriangleBatch::AddTriangle(M3DVector3f verts[3], M3DVector3f vNorms[3], M3DVector2f vTexCoords[3], float epsilon, int nCheckRange)
     {
+    // Silently fail unless in debug mode
+    if(nNumIndexes >= nMaxIndexes) {
+        Q_ASSERT(false);
+        return;
+        }
+
     // First thing we do is make sure the normals are unit length!
     // It's almost always a good idea to work with pre-normalized normals
-    if(vNorms != NULL) {
+    if(vNorms != nullptr) {
         m3dNormalizeVector3(vNorms[0]);
         m3dNormalizeVector3(vNorms[1]);
         m3dNormalizeVector3(vNorms[2]);
         }
 
 	// If we.. even once, set texture to NULL, then nothing in the batch has texture coordinates
-	if(vTexCoords == NULL && pTexCoords != NULL) {
+    if(vTexCoords == nullptr && pTexCoords != nullptr) {
 		delete [] pTexCoords;
-		pTexCoords = NULL;
+        pTexCoords = nullptr;
 		}
         
     // Ditto for normals
-    if(vNorms == NULL && pNorms != NULL) {
+    if(vNorms == nullptr && pNorms != nullptr) {
         delete [] pNorms;
-        pNorms = NULL;
+        pNorms = nullptr;
         }
-		
-	
+
+    // Allow not checking EVERY vertex
+    int nSearchStart = nNumVerts - nCheckRange;
+    if(nSearchStart < 0)
+        nSearchStart = 0;
+
     // Search for match - triangle consists of three verts
-    for(GLuint iVertex = 0; iVertex < 3; iVertex++)
+    for(GLuint iVertex = 0; iVertex < 3; iVertex++) // This is our new triangle
         {
         GLuint iMatch = 0;
-        for(iMatch = 0; iMatch < nNumVerts; iMatch++)
+        for(iMatch = nSearchStart; iMatch < nNumVerts; iMatch++)   // This is all the triangles that came before
             {
             // We have vertexes, texture coordinates, and normals
 			if(pTexCoords && pNorms) {
@@ -187,7 +206,7 @@ void GLTriangleBatch::AddTriangle(M3DVector3f verts[3], M3DVector3f vNorms[3], M
                 }
                  
             // We have vertexes, texture coordinates, and no normals
-			if(pTexCoords && pNorms == NULL) {
+            if(pTexCoords && pNorms == NULL) {
 				if(m3dCloseEnough(pVerts[iMatch][0], verts[iVertex][0], epsilon) &&
 				   m3dCloseEnough(pVerts[iMatch][1], verts[iVertex][1], epsilon) &&
 				   m3dCloseEnough(pVerts[iMatch][2], verts[iVertex][2], epsilon) &&
@@ -239,7 +258,6 @@ void GLTriangleBatch::AddTriangle(M3DVector3f verts[3], M3DVector3f vNorms[3], M
     }
     
 
-
 //////////////////////////////////////////////////////////////////
 // Compact the data. This is a nice utility, but you should really
 // save the results of the indexing for future use if the model data
@@ -247,100 +265,75 @@ void GLTriangleBatch::AddTriangle(M3DVector3f verts[3], M3DVector3f vNorms[3], M
 void GLTriangleBatch::End(void)
     {
     bMadeStuff = true;
+
+    // Find the radius of the smallest sphere that would enclose the model
+    // This is useful for some things.
+    boundingSphereRadius = 0.0f;
+    for(unsigned int i = 0; i < nNumVerts; i++) {
+        GLfloat r = m3dGetVectorLengthSquared3(pVerts[i]);
+        if(r > boundingSphereRadius)
+            boundingSphereRadius = r;
+        }
+    boundingSphereRadius = sqrt(boundingSphereRadius);
     
     // Create the buffer objects - might need as many as four
     glGenBuffers(4, bufferObjects);
-    
-    // Copy data to video memory
+    glGenVertexArrays(1, &vertexArrayBufferObject);
+    glBindVertexArray(vertexArrayBufferObject);
+
+    // Copy data to GPU memory
     // Vertex data
     glBindBuffer(GL_ARRAY_BUFFER, bufferObjects[VERTEX_DATA]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*nNumVerts*3, pVerts, GL_STATIC_DRAW);
+    glVertexAttribPointer(GLT_ATTRIBUTE_VERTEX, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(GLT_ATTRIBUTE_VERTEX);
+    delete [] pVerts;
+    pVerts = (M3DVector3f*)NOT_VALID_BUT_USED;
 
-    
+
     // Normal data
     if(pNorms) {
         glBindBuffer(GL_ARRAY_BUFFER, bufferObjects[NORMAL_DATA]);
         glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*nNumVerts*3, pNorms, GL_STATIC_DRAW);
+        glVertexAttribPointer(GLT_ATTRIBUTE_NORMAL, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray(GLT_ATTRIBUTE_NORMAL);
+        delete [] pNorms;
+        pNorms = (M3DVector3f*)NOT_VALID_BUT_USED;
         }
+    else {
+        delete [] pNorms;
+        pNorms = nullptr;
+        }
+
         
     // Texture coordinates
     if(pTexCoords) {
         glBindBuffer(GL_ARRAY_BUFFER, bufferObjects[TEXTURE_DATA]);
         glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*nNumVerts*2, pTexCoords, GL_STATIC_DRAW);
+        glVertexAttribPointer(GLT_ATTRIBUTE_TEXTURE0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray(GLT_ATTRIBUTE_TEXTURE0);
+        delete [] pTexCoords;
+        pTexCoords = (M3DVector2f *)NOT_VALID_BUT_USED;
         }
         
     // Indexes
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferObjects[INDEX_DATA]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort)*nNumIndexes, pIndexes, GL_STATIC_DRAW);
-	
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	// Find the radius of the smallest sphere that would enclose the model
-    // This is useful for some things.
-	boundingSphereRadius = 0.0f;
-	for(unsigned int i = 0; i < nNumVerts; i++) {
-		GLfloat r = m3dGetVectorLengthSquared3(pVerts[i]);
-		if(r > boundingSphereRadius)
-			boundingSphereRadius = r;
-		}
-	boundingSphereRadius = sqrt(boundingSphereRadius);
-
-    // Free older, larger arrays
     delete [] pIndexes;
-    delete [] pVerts;
-    delete [] pNorms;
-    delete [] pTexCoords;
+    pIndexes = (GLushort*)NOT_VALID_BUT_USED;
 
-    // Reasign pointers so they are marked as unused
-    // No. Don't do this. I need to know if they are NULL, it means nothing was put there,
-    // at least for the last two
-//    pIndexes = NULL;
-//    pVerts = NULL;
-//    pNorms = NULL;
-//    pTexCoords = NULL;    
+    glBindVertexArray(0);
     }
 
 //////////////////////////////////////////////////////////////////////////
 // Submit...
-void GLTriangleBatch::Draw(bool bToggleAttribs)
-	{
-    if(bToggleAttribs)
-        glEnableVertexAttribArray(GLT_ATTRIBUTE_VERTEX);
+void GLTriangleBatch::Draw(void)
+    {
+    if(nNumIndexes <= 0)
+        return;
 
-    glBindBuffer(GL_ARRAY_BUFFER, bufferObjects[VERTEX_DATA]);
-    glVertexAttribPointer(GLT_ATTRIBUTE_VERTEX, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-    if(pNorms) {
-        if(bToggleAttribs)
-            glEnableVertexAttribArray(GLT_ATTRIBUTE_NORMAL);
-
-        glBindBuffer(GL_ARRAY_BUFFER, bufferObjects[NORMAL_DATA]);
-        glVertexAttribPointer(GLT_ATTRIBUTE_NORMAL, 3, GL_FLOAT, GL_FALSE, 0, 0);
-        }
-        
-    if(pTexCoords) {
-        if(bToggleAttribs)
-            glEnableVertexAttribArray(GLT_ATTRIBUTE_TEXTURE0);
-        
-        glBindBuffer(GL_ARRAY_BUFFER, bufferObjects[TEXTURE_DATA]);
-        glVertexAttribPointer(GLT_ATTRIBUTE_TEXTURE0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-        }
-        
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferObjects[INDEX_DATA]);
-	if(nNumIndexes > 0)
-	    glDrawElements(GL_TRIANGLES, nNumIndexes, GL_UNSIGNED_SHORT, 0);
-    
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    if(bToggleAttribs) {
-        glDisableVertexAttribArray(GLT_ATTRIBUTE_VERTEX);
-        glDisableVertexAttribArray(GLT_ATTRIBUTE_NORMAL);
-        glDisableVertexAttribArray(GLT_ATTRIBUTE_TEXTURE0);
-        }
+    glBindVertexArray(vertexArrayBufferObject);
+    glDrawElements(GL_TRIANGLES, nNumIndexes, GL_UNSIGNED_SHORT, 0);
     }
 
 ////////////////////////////////////////////////////////////////////////
@@ -400,15 +393,15 @@ bool GLTriangleBatch::SaveMesh(FILE *pFile)
 bool GLTriangleBatch::LoadMesh(FILE *pFile, bool bNormals, bool bTexCoords)
     {
 // In case this is called first (does no harm to call multiple times)
-#ifndef SB_MOBILE_BUILD
+#ifndef QT_IS_AVAILABLE
     initializeOpenGLFunctions();
 #endif
     // Create the buffer objects
     glGenBuffers(4, bufferObjects);
     
     // Create the master vertex array object
- //   glGenVertexArrays(1, &vertexArrayBufferObject);
- //   glBindVertexArray(vertexArrayBufferObject);
+    glGenVertexArrays(1, &vertexArrayBufferObject);
+    glBindVertexArray(vertexArrayBufferObject);
     
     // Read it all in
     fread(&nNumIndexes, sizeof(GLuint), 1, pFile);

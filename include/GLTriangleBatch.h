@@ -2,18 +2,14 @@
  *  GLTriangleBatch.h
  *  OpenGL SuperBible
  *
-Copyright (c) 2007-2009, Richard S. Wright Jr.
+Copyright (c) 2007-2023, Richard S. Wright Jr.
 All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source forms, with or without modification, 
 are permitted provided that the following conditions are met:
 
 Redistributions of source code must retain the above copyright notice, this list 
 of conditions and the following disclaimer.
-
-Redistributions in binary form must reproduce the above copyright notice, this list 
-of conditions and the following disclaimer in the documentation and/or other 
-materials provided with the distribution.
 
 Neither the name of Richard S. Wright Jr. nor the names of other contributors may be used 
 to endorse or promote products derived from this software without specific prior 
@@ -42,22 +38,27 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
  *
  */
 
-#ifndef __TRIANGLE_BATCH
-#define __TRIANGLE_BATCH 
+#ifndef __GLT_TRIANGLE_BATCH
+#define __GLT_TRIANGLE_BATCH
 
-#include "GLTools.h"
-
-#include <math3d.h>
-#include <GLBatchBase.h>
-#include <GLShaderManager.h>
 #include <stdio.h>
+
+#include "math3d.h"
+#include "GLBatchBase.h"
+#include "GLShaderManager.h"
+
 
 #define VERTEX_DATA     0
 #define NORMAL_DATA     1
 #define TEXTURE_DATA    2
 #define INDEX_DATA      3
 
+#ifdef QT_IS_AVAILABLE
+#include <qopenglextrafunctions.h>
 class GLTriangleBatch : public GLBatchBase
+#else
+class GLTriangleBatch
+#endif
     {
     public:
         GLTriangleBatch(void);
@@ -65,7 +66,7 @@ class GLTriangleBatch : public GLBatchBase
         
         // Use these three functions to add triangles
         void BeginMesh(GLuint nMaxVerts);
-        void AddTriangle(M3DVector3f verts[3], M3DVector3f vNorms[3], M3DVector2f vTexCoords[3], float epsilon = 0.00001f);
+        void AddTriangle(M3DVector3f verts[3], M3DVector3f vNorms[3], M3DVector2f vTexCoords[3], float epsilon = 0.00001f, int nCheckRange = INT_MAX);
         void End(void);
 
         // Useful for statistics
@@ -81,13 +82,13 @@ class GLTriangleBatch : public GLBatchBase
         bool LoadMesh(FILE *pFile, bool bNormals = true, bool bTexCoords = true);
         
         // Draw - make sure you call glEnableClientState for these arrays
-        virtual void Draw(bool bToggleAttribs = true);
+        virtual void Draw(void);
         
     protected:
-        GLushort  *pIndexes;        // Array of indexes
-        M3DVector3f *pVerts;        // Array of vertices
-        M3DVector3f *pNorms;        // Array of normals
-        M3DVector2f *pTexCoords;    // Array of texture coordinates
+        GLushort  *pIndexes = nullptr;         // Array of indexes
+        M3DVector3f *pVerts = nullptr;         // Array of vertices
+        M3DVector3f *pNorms = nullptr;         // Array of normals
+        M3DVector2f *pTexCoords = nullptr;     // Array of texture coordinates
         
         GLuint nMaxIndexes;         // Maximum workspace
         GLuint nNumIndexes;         // Number of indexes currently used
@@ -95,7 +96,7 @@ class GLTriangleBatch : public GLBatchBase
         
         bool   bMadeStuff;
         GLuint bufferObjects[4];
-
+        GLuint vertexArrayBufferObject;
         GLfloat	boundingSphereRadius;
     };
 

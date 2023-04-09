@@ -1,6 +1,6 @@
 // GLShaderManager.h
 /*
-Copyright (c) 2009, Richard S. Wright Jr.
+Copyright (c) 2009-2023, Richard S. Wright Jr.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, 
@@ -8,10 +8,6 @@ are permitted provided that the following conditions are met:
 
 Redistributions of source code must retain the above copyright notice, this list 
 of conditions and the following disclaimer.
-
-Redistributions in binary form must reproduce the above copyright notice, this list 
-of conditions and the following disclaimer in the documentation and/or other 
-materials provided with the distribution.
 
 Neither the name of Richard S. Wright Jr. nor the names of other contributors may be used 
 to endorse or promote products derived from this software without specific prior 
@@ -31,56 +27,33 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 #ifndef __GLT_SHADER_MANAGER
 #define __GLT_SHADER_MANAGER
 
-#ifndef SB_MOBILE_BUILD
-#include <QOpenGLFunctions>
+#ifdef QT_IS_AVAILABLE
+#include <QOpenGLExtraFunctions>
 #endif
 
-
-// Mac OS X
-#ifdef __APPLE__
-#include <TargetConditionals.h>
-#if TARGET_OS_IPHONE | TARGET_IPHONE_SIMULATOR
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
-#define OPENGL_ES
-#endif
-#endif
-
-// Linux
-#ifdef SB_LINUX_BUILD
-#ifndef SB_MOBILE_ANDROID
-#else
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-#endif
-#endif
-
-//#include <vector>
-//using namespace std;
+#include <stdarg.h>
+#include <string.h>
 
 // Maximum length of shader name
 #define MAX_SHADER_NAME_LENGTH	64
 
-enum GLT_STOCK_SHADER { GLT_SHADER_IDENTITY = 0, GLT_SHADER_FLAT, GLT_SHADER_SHADED, GLT_SHADER_DEFAULT_LIGHT, GLT_SHADER_POINT_LIGHT_DIFF,
-								GLT_SHADER_TEXTURE_REPLACE, GLT_SHADER_TEXTURE_MODULATE, GLT_SHADER_TEXTURE_POINT_LIGHT_DIFF,
-                                GLT_SHADER_POINT_SPRITES, GLT_SHADER_PLANET, GLT_SHADER_RINGS,
-                                GLT_SHADER_LAST };
+enum GLT_STOCK_SHADER { GLT_SHADER_IDENTITY = 0, GLT_SHADER_FLAT, GLT_SHADER_SHADED, GLT_SHADER_DEFAULT_LIGHT, GLT_SHADER_POINT_LIGHT_DIFF, GLT_SHADER_TEXTURE_REPLACE, GLT_SHADER_TEXTURE_MODULATE, GLT_SHADER_TEXTURE_POINT_LIGHT_DIFF,
+                                GLT_SHADER_POINT_SPRITES, GLT_POINT_SPRITES_PLAIN, GLT_SHADER_LAST };
 
-//GLT_SHADER_TEXTURE_RECT_REPLACE
 
 enum GLT_SHADER_ATTRIBUTE { GLT_ATTRIBUTE_VERTEX = 0, GLT_ATTRIBUTE_COLOR, GLT_ATTRIBUTE_NORMAL, 
                                     GLT_ATTRIBUTE_TEXTURE0, GLT_ATTRIBUTE_TEXTURE1, GLT_ATTRIBUTE_TEXTURE2, GLT_ATTRIBUTE_TEXTURE3,
                                     GLT_ATTRIBUTE_LAST};
 
 
-struct SHADERLOOKUPETRY {
+struct SHADERLOOKUPENTRY {
 	char szVertexShaderName[MAX_SHADER_NAME_LENGTH];
 	char szFragShaderName[MAX_SHADER_NAME_LENGTH];
 	GLuint uiShaderID;
 	};
 
-#ifndef SB_MOBILE_BUILD
-    class GLShaderManager: protected QOpenGLFunctions
+#ifdef QT_IS_AVAILABLE
+    class GLShaderManager: protected QOpenGLExtraFunctions
 #else
 class GLShaderManager
 #endif
@@ -88,6 +61,8 @@ class GLShaderManager
 	public:
 		GLShaderManager(void);
 		~GLShaderManager(void);
+
+        void freeGL(void); // Free GL resources
 		
 		// Call before using
 		bool InitializeStockShaders(void);
@@ -110,7 +85,6 @@ class GLShaderManager
 	
 	protected:
 		GLuint	uiStockShaders[GLT_SHADER_LAST];
-
 	};
 
 
