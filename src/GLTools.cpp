@@ -215,6 +215,7 @@ void gltMakeTorus(GLTriangleBatch& torusBatch, GLfloat majorRadius, GLfloat mino
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // Make a sphere
+// +Z comes out the top of the sphere
 void gltMakeSphere(GLTriangleBatch& sphereBatch, GLfloat fRadius, GLint iSlices, GLint iStacks)
 	{
     GLfloat drho = (GLfloat)(3.141592653589) / (GLfloat) iStacks;

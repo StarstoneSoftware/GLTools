@@ -53,8 +53,8 @@ static const char *szIdentityShaderFP =
                                         "#version 400\r\n"
 #else
                                         "#version 300 es\r\n"
-                                        "precision mediump float;"
 #endif
+                                        "precision mediump float;"
                                         "out vec4 vFragmentColor;"
                                         "uniform vec4 vColor;"
                                         "void main(void) "
@@ -71,9 +71,9 @@ static const char *szFlatShaderVP =
                                     "#version 400\r\n"
 #else
                                     "#version 300 es\r\n"
-                                    "precision mediump float;"
 
 #endif
+                                    "precision mediump float;"
                                     "uniform mat4 mvpMatrix;"
                                     "in vec4 vVertex;"
                                     "void main(void) "
@@ -85,9 +85,9 @@ static const char *szFlatShaderFP =
                                             "#version 400\r\n"
 #else
                                             "#version 300 es\r\n"
-                                            "precision mediump float;"
 
 #endif
+                                    "precision mediump float;"
                                     "out vec4 vFragmentColor;"
                                     "uniform vec4 vColor;"
                                     "void main(void) "
@@ -118,9 +118,9 @@ static const char *szShadedFP =
                                             "#version 400\r\n"
         #else
                                             "#version 300 es\r\n"
-                                            "precision mediump float;"
 
         #endif
+                                    "precision mediump float;"
                                     "out vec4 vFragmentColor;"
                                     "in vec4 vFragColor; "
                                     "void main(void) { "
@@ -139,7 +139,7 @@ static const char *szDefaultLightVP =
                                      "#version 300 es\r\n"
 
 #endif
-                                        "uniform mat4 mvMatrix;"
+                                      "uniform mat4 mvMatrix;"
                                       "uniform mat4 pMatrix;"
                                       "out vec4 vFragColor;"
                                       "in vec4 vVertex;"
@@ -166,9 +166,9 @@ static const char *szDefaultLightFP =
                                             "#version 400\r\n"
  #else
                                         "#version 300 es\r\n"
-                                        "precision mediump float;"
 
  #endif
+                                        "precision mediump float;"
                                         "out vec4 vFragmentColor;"
                                         "in vec4 vFragColor; "
                                         "void main(void) { "
@@ -215,9 +215,9 @@ static const char *szPointLightDiffFP =
                                             "#version 400\r\n"
         #else
                                             "#version 300 es\r\n"
-                                            "precision mediump float;"
 
         #endif
+                                        "precision mediump float;"
                                         "out vec4 vFragmentColor;"
                                         "in vec4 vFragColor; "
                                         "void main(void) { "
@@ -246,9 +246,9 @@ static const char *szTextureReplaceFP =
                                             "#version 400\r\n"
         #else
                                             "#version 300 es\r\n"
-                                            "precision mediump float;"
 
         #endif
+                                        "precision mediump float;"
                                         "out vec4 vFragColor;"
                                         "in vec2 vTex;"
                                         "uniform sampler2D textureUnit0;"
@@ -282,8 +282,8 @@ static const char *szTextureModulateFP =
                                             "#version 400\r\n"
         #else
                                             "#version 300 es\r\n"
-                                            "precision mediump float;"
         #endif
+                                        "precision mediump float;"
                                         "out vec4 vFragmentColor;"
                                         "in vec2 vTex;"
                                         "uniform sampler2D textureUnit0;"
@@ -338,9 +338,9 @@ static const char *szTexturePointLightDiffFP =
                                             "#version 400\r\n"
         #else
                                             "#version 300 es\r\n"
-                                            "precision mediump float;"
 
         #endif
+                                                "precision mediump float;"
                                                 "out vec4 vFragmentColor;"
                                                 "in vec4 vFragColor;"
                                                 "in vec2 vTex;"
@@ -379,9 +379,9 @@ static const char *szPointSpriteFP =
                                             "#version 400\r\n"
         #else
                                             "#version 300 es\r\n"
-                                            "precision mediump float;"
 
         #endif
+                                        "precision mediump float;"
                                         "out vec4 vFragmentColor;"
                                         "in vec4 vTex;"
                                         "in vec4 vPointColor;"
@@ -422,9 +422,9 @@ static const char *szPointSpritePlainFP =
                                             "#version 400\r\n"
         #else
                                             "#version 300 es\r\n"
-                                            "precision mediump float;"
 
         #endif
+                                        "precision mediump float;"
                                         "out vec4 vFragmentColor;"
                                         "in vec4 vPointColor;"
 
