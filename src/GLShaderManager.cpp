@@ -254,8 +254,7 @@ static const char *szTextureReplaceFP =
                                         "uniform sampler2D textureUnit0;"
                                         "void main(void) "
                                         "{ "
-                                        "float l = texture(textureUnit0, vTex).r;"
-                                        "vFragColor = vec4(l, l, l, 1.0); "
+                                        "vFragColor = texture(textureUnit0, vTex);"
                                         "}";
 
 
