@@ -9,7 +9,8 @@ HEADERS += $$PWD/include/GLBatch.h \
            $$PWD/include/GLBatchBase.h \
            $$PWD/include/GLShaderManager.h \
            $$PWD/include/GLTools.h \
-           $$PWD/include/GLTriangleBatch.h
+           $$PWD/include/GLTriangleBatch.h \
+           $$PWD/include/GLFrameBuffer.h
 
 SOURCES += $$PWD/src/GLBatch.cpp \
            $$PWD/src/GLShaderManager.cpp \

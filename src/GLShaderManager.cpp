@@ -528,7 +528,7 @@ GLint GLShaderManager::UseStockShader(int nShaderID, ...)
     glUseProgram(uiStockShaders[nShaderID]);
 
     // Set up the uniforms
-    GLint iTransform, iModelMatrix, iProjMatrix, iColor, iLight, iTextureUnit, iPointSize;
+    GLint iTransform, iModelMatrix, iProjMatrix, iColor, iLight, iTextureUnit;
     int				iInteger;
     M3DMatrix44f* mvpMatrix;
     M3DMatrix44f*  pMatrix;
