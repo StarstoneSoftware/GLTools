@@ -81,7 +81,7 @@ class GLFrameBuffer
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
    
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, nWidth, nHeight, 0, GL_BGR, GL_UNSIGNED_BYTE, NULL);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8_SNORM, nWidth, nHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
                 glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureHandle, 0); 
                 }
             else
