@@ -29,8 +29,8 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 #ifndef __GLT_BATCH
 #define __GLT_BATCH
 
-#include <GLTools.h>
-#include <GLBatch.h>
+#include "GLTools.h"
+#include "GLBatch.h"
 
 // Highest 64-bit address. No memory allocation would return this address
 #define NOT_VALID_BUT_USED 0xFFFFFFFFFFFFFFFF
@@ -209,6 +209,10 @@ void GLBatch::End(void)
         
 	bBatchDone = true;
     glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);	// Note: This should NOT be necessary, it should be captured
+										// in the vertex array object binding state. I believe this is a
+										// bug in iOS's OpenGL implementation, and at it is simply redudant
+										// in other implementations/platforms
 }
 
 // *******************************************************************************************

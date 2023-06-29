@@ -30,7 +30,18 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 
 #include <assert.h>
 
-#include "../Math3D/math3d.h"
+#ifdef __APPLE__
+#include <TargetConditionals.h>
+#if TARGET_OS_IPHONE | TARGET_IPHONE_SIMULATOR
+#include <OpenGLES/ES3/gl.h>
+#define OPENGL_ES
+#else
+#include <GL/glew.h>
+#include <OpenGL/gl.h>		// Apple OpenGL haders (version depends on OS X SDK version)
+#endif
+
+#endif
+#include "math3d.h"
 #include "GLBatchBase.h"
 #include "M3DGeometryTransform.h"
 #include "M3DFrame.h"

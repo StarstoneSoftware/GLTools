@@ -34,35 +34,6 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 
 GLTools* GLTools::pMe = NULL;
 
-GLubyte GLTools::szVendor[64];
-GLubyte GLTools::szRenderer[64];
-GLubyte GLTools::szVersion[64];
-
-///////////////////////////////////////////////////////////////////////////////
-// Get the OpenGL version number
-/* No longer used
-void gltGetOpenGLVersion(GLint &nMajor, GLint &nMinor)
-	{
-//    #ifndef OPENGL_ES       
-//    glGetIntegerv(GL_MAJOR_VERSION, &nMajor);
-//    glGetIntegerv(GL_MINOR_VERSION, &nMinor);
-//    #else
-    const char *szVersionString = (const char *)glGetString(GL_VERSION);
-    if(szVersionString == NULL)
-        {
-        nMajor = 0;
-        nMinor = 0;
-        return;
-        }
-    
-    // Get major version number. This stops at the first non numeric character
-    nMajor = atoi(szVersionString);
-    
-    // Get minor version number. Start past the first ".", atoi terminates on first non numeric char.
-    nMinor = atoi(strstr(szVersionString, ".")+1);
-//	#endif
-	}
-*/
 
 /////////////////////////////////////////////////////////////////////////////////
 // No-op on anything other than the Mac, sets the working directory to 
@@ -933,13 +904,16 @@ GLbyte *gltReadTGABits(const char *szFileName, GLint *iWidth, GLint *iHeight, GL
 				pBits[i + 2] = r;
 				}
             break;
+            #ifndef OPENGL_ES
+            // Not supported on OpenGL ES
         case 4:
             *eFormat = GL_BGRA_EXT;
             *iComponents = GL_RGBA;
             break;
+            #endif
         case 1:
-            *eFormat = GL_RED;
-            *iComponents = GL_RED;
+            *eFormat = GL_LUMINANCE;	// GL_RED
+            *iComponents = GL_LUMINANCE; // GL_RED
             break;
         default:        // RGB
             // If on the iPhone/Android, TGA's are BGR, and the iPhone does not
@@ -1084,12 +1058,7 @@ bool GLTools::gltLoadShaderFile(const char *szFile, GLuint shader)
     if(fp != NULL)
 		{
         // Get a line at a time
-        while (fgets(szShaderLine, 128, fp) != NULL) {
-        
-#ifdef OPENGL_ES
-            if(strstr(szShaderLine, "#version") != NULL)
-                strcpy(szShaderLine, "precision highp float;\n");
-#endif
+        while (fgets(szShaderLine, 128, fp) != NULL) {        
             shaderLength+= strlen(szShaderLine);
 
             if(shaderLength < MAX_SHADER_LENGTH)

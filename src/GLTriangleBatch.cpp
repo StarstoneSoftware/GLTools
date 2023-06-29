@@ -38,8 +38,11 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
  *  model file format).
  *
  */
-
+ 
+ 
+#include "GLTools.h"
 #include "GLTriangleBatch.h"
+#include <assert.h>
 
 
 // Highest 64-bit address. No memory allocation would return this address
@@ -130,7 +133,7 @@ void GLTriangleBatch::AddTriangle(M3DVector3f verts[3], M3DVector3f vNorms[3], M
     {
     // Silently fail unless in debug mode
     if(nNumIndexes >= nMaxIndexes) {
-        Q_ASSERT(false);
+        assert(false);
         return;
         }
 
@@ -305,7 +308,7 @@ void GLTriangleBatch::End(void)
         pNorms = nullptr;
         }
 
-        
+
     // Texture coordinates
     if(pTexCoords) {
         glBindBuffer(GL_ARRAY_BUFFER, bufferObjects[TEXTURE_DATA]);
@@ -323,6 +326,11 @@ void GLTriangleBatch::End(void)
     pIndexes = (GLushort*)NOT_VALID_BUT_USED;
 
     glBindVertexArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);	// Note: This should NOT be necessary, it should be captured
+										// in the vertex array object binding state. I believe this is a
+										// bug in iOS's OpenGL implementation, and at it is simply redudant
+										// in other implementations/platforms
     }
 
 //////////////////////////////////////////////////////////////////////////
@@ -393,7 +401,7 @@ bool GLTriangleBatch::SaveMesh(FILE *pFile)
 bool GLTriangleBatch::LoadMesh(FILE *pFile, bool bNormals, bool bTexCoords)
     {
 // In case this is called first (does no harm to call multiple times)
-#ifndef QT_IS_AVAILABLE
+#ifdef QT_IS_AVAILABLE
     initializeOpenGLFunctions();
 #endif
     // Create the buffer objects

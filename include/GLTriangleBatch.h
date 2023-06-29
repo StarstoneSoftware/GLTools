@@ -42,6 +42,7 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 #define __GLT_TRIANGLE_BATCH
 
 #include <stdio.h>
+#include <limits.h>
 
 #include "math3d.h"
 #include "GLBatchBase.h"

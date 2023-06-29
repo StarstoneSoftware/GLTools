@@ -31,6 +31,18 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 #include <qopenglextrafunctions.h>
 #endif
 
+// Mac OS X
+#ifdef __APPLE__
+#include <TargetConditionals.h>
+#if TARGET_OS_IPHONE | TARGET_IPHONE_SIMULATOR
+#include <OpenGLES/ES3/gl.h>
+#define OPENGL_ES
+#else
+#include <GL/glew.h>
+#include <OpenGL/gl.h>		// Apple OpenGL haders (version depends on OS X SDK version)
+#endif
+#endif
+
 
 #include <stdio.h>
 #include <assert.h>
@@ -50,7 +62,7 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF S
 // Universal includes
 #include <stdio.h>
 #include <math.h>
-#include <math3d.h>
+#include "math3d.h"
 #include "GLBatch.h"
 #include "GLTriangleBatch.h"
 
@@ -75,9 +87,6 @@ class GLTools
             #ifdef QT_IS_AVAILABLE
                 initializeOpenGLFunctions();
             #endif
-		strncpy((char *)szRenderer, (char*)glGetString(GL_RENDERER), 63); szRenderer[63] = 0;
-		strncpy((char *)szVendor, (char *)glGetString(GL_VENDOR), 63);     szVendor[63] = 0;
-		strncpy((char *)szVersion, (char *)glGetString(GL_VERSION), 63);   szVersion[63] = 0;
     }
 
 	// Shader loading support
